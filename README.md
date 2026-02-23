@@ -17,7 +17,7 @@
 
 <br/>
 
-[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_App-6366f1?style=for-the-badge)](YOUR_VERCEL_LINK_HERE)
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-precious--tech--mart.vercel.app-6366f1?style=for-the-badge)](https://precious-tech-mart.vercel.app/)
 &nbsp;
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
@@ -50,6 +50,8 @@
 
 Think Product Hunt, but built with the latest cutting-edge web technologies and a focus on authentic community engagement.
 
+🔗 **Live at:** [precious-tech-mart.vercel.app](https://precious-tech-mart.vercel.app/)
+
 ---
 
 ## 💫 Features
@@ -67,7 +69,8 @@ Think Product Hunt, but built with the latest cutting-edge web technologies and 
 | 🗳️ **Voting System** | Community upvoting and downvoting for product rankings |
 | 🏷️ **Tag Categorization** | Browse and filter products by tags and categories |
 | 🔍 **SEO Optimization** | SEO-friendly product pages with metadata and Open Graph support |
-| 📈 **Performance** | Optimized with Next.js Server Components and static generation |
+| 📈 **Performance** | Optimized with Next.js Server Components, PPR, and 15-minute revalidation |
+| 🔐 **Auto Org Creation** | Automatically creates an organization for new users on sign-up via Clerk middleware |
 
 ---
 
@@ -76,8 +79,8 @@ Think Product Hunt, but built with the latest cutting-edge web technologies and 
 ### Frontend
 | Technology | Purpose |
 |---|---|
-| [Next.js 16](https://nextjs.org/) | App Router, Server Components, SSR, API Routes |
-| [React 19](https://react.dev/) | UI components with latest concurrent features |
+| [Next.js 16](https://nextjs.org/) | App Router, Server Components, SSR, Partial Prerender (PPR) |
+| [React 19](https://react.dev/) | UI components with latest concurrent features and `useActionState` |
 | [TailwindCSS 4](https://tailwindcss.com/) | Utility-first responsive styling |
 | [ShadcN UI](https://ui.shadcn.com/) | Accessible, customizable component library |
 
@@ -87,13 +90,14 @@ Think Product Hunt, but built with the latest cutting-edge web technologies and 
 | [NeonDB](https://neon.tech/) | Serverless PostgreSQL database |
 | [Drizzle ORM](https://orm.drizzle.team/) | Type-safe database queries and migrations |
 | [Zod](https://zod.dev/) | Schema validation and form data parsing |
+| Next.js Server Actions | Form submissions and mutations without a separate API layer |
 
 ### Authentication & Infrastructure
 | Technology | Purpose |
 |---|---|
-| [Clerk](https://clerk.com/) | Auth with Passkeys, GitHub, and Google Sign-in |
+| [Clerk](https://clerk.com/) | Auth with Passkeys, GitHub, and Google Sign-in + org management |
 | [TypeScript](https://www.typescriptlang.org/) | Static typing across the entire codebase |
-| [Vercel](https://vercel.com/) | Deployment and edge hosting |
+| [Vercel](https://vercel.com/) | Deployment, edge hosting, and environment management |
 
 ---
 
@@ -113,7 +117,7 @@ Make sure you have the following installed:
 **1. Clone the repository**
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/tech-mart.git
+git clone https://github.com/Codegoddexx/tech-mart.git
 cd tech-mart
 ```
 
@@ -146,6 +150,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+> ⚠️ **Codespaces users:** Add your Codespaces hostname to `allowedOrigins` in `next.config.ts` to avoid Server Actions origin mismatch errors.
+
 ---
 
 ## 🔐 Environment Variables
@@ -154,7 +160,7 @@ Create a `.env.local` file in the root of your project with the following variab
 
 ```env
 # Database (NeonDB)
-DATABASE_URL=your_neon_database_url
+DATABASE_URL=your_neon_postgresql_connection_string
 
 # Clerk Authentication
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
@@ -166,6 +172,10 @@ NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
 NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
 NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
 ```
+
+**Where to find your keys:**
+- `DATABASE_URL` → [neon.tech](https://neon.tech) → your project → Dashboard → Connection string
+- Clerk keys → [clerk.com](https://clerk.com) → your app → API Keys
 
 > ⚠️ Never commit your `.env.local` file. It is already included in `.gitignore`.
 
@@ -197,41 +207,43 @@ npx drizzle-kit studio
 ```
 tech-mart/
 ├── app/                        # Next.js App Router
-│   ├── (auth)/                 # Authentication routes
 │   ├── admin/                  # Admin panel
-│   ├── products/               # Product pages
+│   ├── explore/                # Explore products page
+│   ├── products/               # Product detail pages [slug]
 │   ├── submit/                 # Product submission page
-│   ├── layout.tsx              # Root layout
+│   ├── layout.tsx              # Root layout with ClerkProvider
 │   └── page.tsx                # Home page
 ├── components/
-│   ├── common/                 # Shared components (Header, Footer)
-│   ├── forms/                  # Form components
-│   ├── products/               # Product-specific components
+│   ├── common/                 # Shared components (Header, Footer, UserButton)
+│   ├── forms/                  # Reusable form field components
+│   ├── landing-page/           # Featured & recently launched sections
+│   ├── products/               # Product cards, voting buttons, submit form
 │   └── ui/                     # ShadcN UI components
 ├── db/
-│   ├── index.ts                # Database connection
+│   ├── index.ts                # NeonDB + Drizzle connection
 │   └── schema.ts               # Drizzle schema definitions
 ├── drizzle/                    # Generated migrations
 ├── lib/
-│   ├── products/               # Product actions and validations
+│   ├── products/               # Server actions and Zod validations
 │   └── utils.ts                # Utility functions
-├── types/                      # TypeScript type definitions
+├── types/                      # Shared TypeScript types (FormState etc.)
+├── middleware.ts                # Clerk auth + auto org creation + origin fix
 ├── drizzle.config.ts           # Drizzle ORM config
-└── next.config.ts              # Next.js config
+└── next.config.ts              # Next.js config with PPR and Server Actions
 ```
 
 ---
 
 ## 🌍 Deployment
 
-This app is deployed on **Vercel**.
+This app is deployed on **Vercel** at [precious-tech-mart.vercel.app](https://precious-tech-mart.vercel.app/).
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YOUR_USERNAME/tech-mart)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Codegoddexx/tech-mart)
 
 **To deploy your own instance:**
 
 1. Push your code to GitHub
-2. Import the project into [Vercel](https://vercel.com)
+2. Import the project at [vercel.com](https://vercel.com)
 3. Add all environment variables in the Vercel dashboard
 4. Deploy 🚀
 
