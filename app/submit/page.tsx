@@ -14,7 +14,7 @@ export default function SubmitPage() {
           />
         </div>
         <div className="max-w-2xl mx-auto">
-          <ProductSubmitForm/>
+          <ProductSubmitForm />
         </div>
       </div>
     </section>
